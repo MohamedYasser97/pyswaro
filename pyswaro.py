@@ -10,7 +10,8 @@ BATTERY_TOLLS = {
 }
 TIME_TOLLS = {
   'SCAN': 4e-3,
-  'TIMEOUT': 2
+  'TIMEOUT': 2,
+  'PER_RANGE': 1e-3
 }
 
 LEADERS_COORDINATES = [(2,0), (2,5), (5,5), (7,1)]
@@ -61,7 +62,7 @@ def leader_scan(scan_range):
 
       drain_battery(i, j) # Leader
       drain_battery(i, j+scan_range) # Subordinate
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else: # If there's no subordinate then it's a wasted comm from leader
       failures += 1
 
@@ -72,7 +73,7 @@ def leader_scan(scan_range):
 
       drain_battery(i, j)
       drain_battery(i, j-scan_range)
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else:
       failures += 1
 
@@ -83,7 +84,7 @@ def leader_scan(scan_range):
 
       drain_battery(i, j)
       drain_battery(i-scan_range, j)
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else:
       failures += 1
 
@@ -94,7 +95,7 @@ def leader_scan(scan_range):
 
       drain_battery(i, j)
       drain_battery(i+scan_range, j)
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else:
       failures += 1
 
@@ -105,7 +106,7 @@ def leader_scan(scan_range):
 
       drain_battery(i, j)
       drain_battery(i-scan_range, j+scan_range)
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else:
       failures += 1
 
@@ -116,7 +117,7 @@ def leader_scan(scan_range):
 
       drain_battery(i, j)
       drain_battery(i-scan_range, j-scan_range)
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else:
       failures += 1
 
@@ -127,7 +128,7 @@ def leader_scan(scan_range):
 
       drain_battery(i, j)
       drain_battery(i+scan_range, j+scan_range)
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else:
       failures += 1
 
@@ -138,17 +139,16 @@ def leader_scan(scan_range):
 
       drain_battery(i, j)
       drain_battery(i+scan_range, j-scan_range)
-      total_time_consumed += 2 * TIME_TOLLS['SCAN']
+      total_time_consumed += 2 * (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
     else:
       failures += 1
     
     # Calculate failure tolls for leader
     for i in range(failures):
       drain_battery(i, j)
-      total_time_consumed += TIME_TOLLS['SCAN']
-      total_time_consumed += TIME_TOLLS['TIMEOUT']
+      total_time_consumed += TIME_TOLLS['SCAN'] + (TIME_TOLLS['PER_RANGE'] * scan_range)
+      total_time_consumed += TIME_TOLLS['TIMEOUT'] + (TIME_TOLLS['PER_RANGE'] * scan_range)
 
-# TODO: MULTIPLY SCAN_RANGE BY PERC FOR ACCURATE TOLLS
 
 init_terrain()
 init_charge_batteries()
