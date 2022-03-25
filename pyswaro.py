@@ -242,8 +242,11 @@ def scan_leftovers():
                 leftovers += 1
 
     for i, j in LEADERS_COORDINATES:
-        drain_battery(i, j, 'MOVEMENT')
-        total_time_consumed += TIME_TOLLS['LEFTOVER']
+        for k in range(int(((leftovers/(ROWS*COLS))*100)/len(LEADERS_COORDINATES))):
+            drain_battery(i, j, 'MOVEMENT')
+
+        total_time_consumed += TIME_TOLLS['LEFTOVER'] + \
+            ((leftovers/(ROWS*COLS))/len(LEADERS_COORDINATES))
 
 
 def leader_count():
