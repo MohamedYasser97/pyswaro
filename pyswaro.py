@@ -18,7 +18,7 @@ TIME_TOLLS = {
     'ALREADY_VISITED': 1e-3
 }
 
-LEADERS_COORDINATES = [(0,0), (3, 3), (4,4)]
+LEADERS_COORDINATES = [(0, 0), (3, 3), (4, 4)]
 terrain = [[]]
 visited = [[]]
 leader_tally = []
@@ -54,11 +54,15 @@ def drain_battery(i, j, toll_type='COMMUNICATION'):
     terrain[i][j] -= BATTERY_TOLLS[toll_type]
 
 
-def leader_scan(scan_range):
+def leader_scan(scan_range, finished_leaders):
     global terrain, visited, total_time_consumed
     current_leader = 0
     for i, j in LEADERS_COORDINATES:
+        if (i, j) in finished_leaders:
+            continue
+
         failures = 0
+        cur_visited_nodes = 0
 
         # Scan right
         if j+scan_range < COLS:
@@ -70,8 +74,10 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')  # Leader
-                drain_battery(i, j+scan_range, 'ALREADY_VISITED')  # Subordinate
+                # Subordinate
+                drain_battery(i, j+scan_range, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['ALREADY_VISITED'] +
                      TIME_TOLLS['PER_RANGE'] * scan_range)
@@ -88,6 +94,7 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')
                 drain_battery(i, j-scan_range, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
@@ -106,6 +113,7 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')
                 drain_battery(i-scan_range, j, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
@@ -124,6 +132,7 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')
                 drain_battery(i+scan_range, j, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
@@ -142,6 +151,7 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')
                 drain_battery(i-scan_range, j+scan_range, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
@@ -160,6 +170,7 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')
                 drain_battery(i-scan_range, j-scan_range, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
@@ -178,6 +189,7 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')
                 drain_battery(i+scan_range, j+scan_range, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
@@ -196,6 +208,7 @@ def leader_scan(scan_range):
                 total_time_consumed += 2 * \
                     (TIME_TOLLS['SCAN'] + TIME_TOLLS['PER_RANGE'] * scan_range)
             else:
+                cur_visited_nodes += 1
                 drain_battery(i, j, 'ALREADY_VISITED')
                 drain_battery(i+scan_range, j-scan_range, 'ALREADY_VISITED')
                 total_time_consumed += 2 * \
@@ -212,7 +225,12 @@ def leader_scan(scan_range):
             total_time_consumed += TIME_TOLLS['TIMEOUT'] + \
                 (TIME_TOLLS['PER_RANGE'] * scan_range)
 
+        if failures > 4 or cur_visited_nodes > 4:
+            finished_leaders.append((i, j))
+
         current_leader += 1
+
+    return finished_leaders
 
 
 def scan_leftovers():
@@ -230,11 +248,12 @@ def scan_leftovers():
 
 def leader_count():
     scan_range = 1
+    finished_leaders = []
     while check_visited() == False:
         if scan_range == MAX_RANGE:
             scan_leftovers()
             break
-        leader_scan(scan_range)
+        finished_leaders = leader_scan(scan_range, finished_leaders)
         scan_range += 1
 
 
