@@ -4,6 +4,7 @@ import numpy as np
 ROWS, COLS = (7, 7)
 MIN_INIT_BATTERY = 50
 MAX_INIT_BATTERY = 100
+MIN_OPERABLE_BATTERY = 2
 MAX_RANGE = 5
 BATTERY_TOLLS = {
     'COMMUNICATION': 0.05,
@@ -58,14 +59,14 @@ def leader_scan(scan_range, finished_leaders):
     global terrain, visited, total_time_consumed
     current_leader = 0
     for i, j in LEADERS_COORDINATES:
-        if (i, j) in finished_leaders:
+        if (i, j) in finished_leaders or terrain[i][j] <= MIN_OPERABLE_BATTERY:
             continue
 
         failures = 0
         cur_visited_nodes = 0
 
         # Scan right
-        if j+scan_range < COLS:
+        if j+scan_range < COLS and terrain[i][j+scan_range] >= MIN_OPERABLE_BATTERY:
             if visited[i][j+scan_range] == 0:
                 visited[i][j+scan_range] = 1
                 leader_tally[current_leader] += 1
@@ -85,7 +86,7 @@ def leader_scan(scan_range, finished_leaders):
             failures += 1
 
         # Scan left
-        if j-scan_range >= 0:
+        if j-scan_range >= 0 and terrain[i][j-scan_range] >= MIN_OPERABLE_BATTERY:
             if visited[i][j-scan_range] == 0:
                 visited[i][j-scan_range] = 1
                 leader_tally[current_leader] += 1
@@ -104,7 +105,7 @@ def leader_scan(scan_range, finished_leaders):
             failures += 1
 
         # Scan up
-        if i-scan_range >= 0:
+        if i-scan_range >= 0 and terrain[i-scan_range][j] >= MIN_OPERABLE_BATTERY:
             if visited[i-scan_range][j] == 0:
                 visited[i-scan_range][j] = 1
                 leader_tally[current_leader] += 1
@@ -123,7 +124,7 @@ def leader_scan(scan_range, finished_leaders):
             failures += 1
 
         # Scan down
-        if i+scan_range < ROWS:
+        if i+scan_range < ROWS and terrain[i+scan_range][j] >= MIN_OPERABLE_BATTERY:
             if visited[i+scan_range][j] == 0:
                 visited[i+scan_range][j] = 1
                 leader_tally[current_leader] += 1
@@ -142,7 +143,7 @@ def leader_scan(scan_range, finished_leaders):
             failures += 1
 
         # Scan NE
-        if i-scan_range >= 0 and j+scan_range < COLS:
+        if i-scan_range >= 0 and j+scan_range < COLS and terrain[i-scan_range][j+scan_range] >= MIN_OPERABLE_BATTERY:
             if visited[i-scan_range][j+scan_range] == 0:
                 visited[i-scan_range][j+scan_range] = 1
                 leader_tally[current_leader] += 1
@@ -161,7 +162,7 @@ def leader_scan(scan_range, finished_leaders):
             failures += 1
 
         # Scan NW
-        if i-scan_range >= 0 and j-scan_range >= 0:
+        if i-scan_range >= 0 and j-scan_range >= 0 and terrain[i-scan_range][j-scan_range] >= MIN_OPERABLE_BATTERY:
             if visited[i-scan_range][j-scan_range] == 0:
                 visited[i-scan_range][j-scan_range] = 1
                 leader_tally[current_leader] += 1
@@ -180,7 +181,7 @@ def leader_scan(scan_range, finished_leaders):
             failures += 1
 
         # Scan SE
-        if i+scan_range < ROWS and j+scan_range < COLS:
+        if i+scan_range < ROWS and j+scan_range < COLS and terrain[i+scan_range][j+scan_range] >= MIN_OPERABLE_BATTERY:
             if visited[i+scan_range][j+scan_range] == 0:
                 visited[i+scan_range][j+scan_range] = 1
                 leader_tally[current_leader] += 1
@@ -199,7 +200,7 @@ def leader_scan(scan_range, finished_leaders):
             failures += 1
 
         # Scan SW
-        if i+scan_range < ROWS and j-scan_range >= 0:
+        if i+scan_range < ROWS and j-scan_range >= 0 and terrain[i+scan_range][j-scan_range] >= MIN_OPERABLE_BATTERY:
             if visited[i+scan_range][j-scan_range] == 0:
                 visited[i+scan_range][j-scan_range] = 1
                 leader_tally[current_leader] += 1
@@ -278,4 +279,3 @@ pprint('Counted:')
 pprint(np.sum(leader_tally) + leftovers)
 
 pprint(f'Total time consumed: {total_time_consumed} seconds')
-# TODO: Deal with idle time and depleted batteries
