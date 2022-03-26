@@ -16,7 +16,9 @@ TIME_TOLLS = {
     'TIMEOUT': 1e-3,
     'PER_RANGE': 0.5e-3,
     'LEFTOVER': 3e-3,
-    'ALREADY_VISITED': 1e-3
+    'ALREADY_VISITED': 1e-3,
+    'LEADER_TO_LEADER': 1e-3,
+    'LEADER_TO_SUB': 1.2e-3
 }
 
 LEADERS_COORDINATES = [(0, 0), (3, 3), (4, 4)]
@@ -260,6 +262,18 @@ def leader_count():
         finished_leaders = leader_scan(scan_range, finished_leaders)
         scan_range += 1
 
+# Maybe add timeouts in the future
+
+
+def leader_meeting():
+    global total_time_consumed
+    for i, j in LEADERS_COORDINATES:
+        terrain[i][j] -= BATTERY_TOLLS['COMMUNICATION'] * \
+            (len(LEADERS_COORDINATES)-1)
+
+    total_time_consumed += TIME_TOLLS['LEADER_TO_LEADER'] * \
+        len(LEADERS_COORDINATES)
+
 
 init()
 set_leaders()
@@ -278,4 +292,11 @@ pprint(visited)
 pprint('Counted:')
 pprint(np.sum(leader_tally) + leftovers)
 
+leader_meeting()
+
+pprint('Leaders meeting: ')
+pprint(terrain)
+
+
 pprint(f'Total time consumed: {total_time_consumed} seconds')
+# TODO: handle simultaneous actions with respect to consumed time
