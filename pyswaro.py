@@ -7,9 +7,9 @@ MAX_INIT_BATTERY = 100
 MIN_OPERABLE_BATTERY = 2
 MAX_RANGE = 5
 BATTERY_TOLLS = {
-    'COMMUNICATION': 0.05,
-    'MOVEMENT': 0.5,
-    'ALREADY_VISITED': 0.025
+    'COMMUNICATION': 5e-4,
+    'MOVEMENT': 6e-4,
+    'ALREADY_VISITED': 2.5e-4,
 }
 TIME_TOLLS = {
     'SCAN': 2e-3,
@@ -17,11 +17,10 @@ TIME_TOLLS = {
     'PER_RANGE': 0.5e-3,
     'LEFTOVER': 3e-3,
     'ALREADY_VISITED': 1e-3,
-    'LEADER_TO_LEADER': 1e-3,
-    'LEADER_TO_SUB': 1.2e-3
+    'LEADER_TO_LEADER': 1e-3
 }
 
-LEADERS_COORDINATES = [(0, 0), (3, 3), (4, 4)]
+LEADERS_COORDINATES = [(0, 0), (0, 6), (6, 0), (6, 6), (3, 3)]
 terrain = [[]]
 visited = [[]]
 leader_tally = []
@@ -240,7 +239,7 @@ def scan_leftovers():
     global visited, total_time_consumed, leftovers
     for i in range(0, ROWS):
         for j in range(0, COLS):
-            if visited[i][j] == 0:
+            if visited[i][j] == 0 and terrain[i][j] >= MIN_OPERABLE_BATTERY:
                 visited[i][j] = 1
                 leftovers += 1
 
@@ -262,10 +261,9 @@ def leader_count():
         finished_leaders = leader_scan(scan_range, finished_leaders)
         scan_range += 1
 
+
 # Maybe add timeouts in the future
-
-
-def leader_meeting():
+def leaders_meeting():
     global total_time_consumed
     for i, j in LEADERS_COORDINATES:
         terrain[i][j] -= BATTERY_TOLLS['COMMUNICATION'] * \
@@ -275,28 +273,49 @@ def leader_meeting():
         len(LEADERS_COORDINATES)
 
 
+# Same as leader_count() but to inform them of total number.
+# Subordinates know what to do based on the total number.
+def leaders_subordinates_meeting():
+    global visited, leader_tally, leftovers
+
+    leftovers = 0
+    visited = np.zeros([ROWS, COLS])
+    leader_tally = np.zeros(len(LEADERS_COORDINATES))
+    leader_count()
+
+
 init()
 set_leaders()
 
-pprint('Terrain before:')
+pprint('Initial terrain:')
 pprint(terrain)
 
 leader_count()
 
-pprint('Terrain after:')
+pprint('Leader count:')
 pprint(terrain)
 
-pprint('Visited after:')
+pprint('Visited:')
 pprint(visited)
 
 pprint('Counted:')
 pprint(np.sum(leader_tally) + leftovers)
 
-leader_meeting()
+leaders_meeting()
 
 pprint('Leaders meeting: ')
 pprint(terrain)
 
+leaders_subordinates_meeting()
+
+pprint('Leaders to subs: ')
+pprint(terrain)
+
+pprint('Visited: ')
+pprint(visited)
+
+pprint('Operable nodes: ')
+pprint(np.sum(leader_tally) + leftovers)
 
 pprint(f'Total time consumed: {total_time_consumed} seconds')
 # TODO: handle simultaneous actions with respect to consumed time
