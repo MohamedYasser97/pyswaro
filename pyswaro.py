@@ -1,5 +1,8 @@
 from pprint import pprint
+from matplotlib.patches import Rectangle
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 ROWS, COLS = (7, 7)
 MIN_INIT_BATTERY = 50
@@ -284,6 +287,24 @@ def leaders_subordinates_meeting():
     leader_count()
 
 
+def draw_terrain(terrain, annotations=True, subtitle='Operation Results'):
+    figure, axes = plt.subplots(1, 2, sharex=False, figsize=(ROWS, COLS))
+
+    figure.suptitle(subtitle)
+    axes[0].set_title('Terrain Battery Levels')
+    axes[1].set_title('Battery Levels Histogram')
+
+    hmap = sns.heatmap(ax=axes[0], data=terrain, annot=annotations, cmap='Greens',
+                       cbar=False, fmt='d', xticklabels=False, yticklabels=False)
+
+    for i, j in LEADERS_COORDINATES:
+        hmap.add_patch(
+            Rectangle((i, j), 1, 1, fill=False, edgecolor='gold', lw=3))
+
+    sns.histplot(data=terrain.flatten(), kde=True)
+    plt.show()
+
+
 init()
 set_leaders()
 
@@ -317,5 +338,6 @@ pprint(visited)
 pprint('Operable nodes: ')
 pprint(np.sum(leader_tally) + leftovers)
 
+draw_terrain(terrain)
 pprint(f'Total time consumed: {total_time_consumed} seconds')
 # TODO: handle simultaneous actions with respect to consumed time
