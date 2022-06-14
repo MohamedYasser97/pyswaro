@@ -299,12 +299,12 @@ def draw_terrain(terrain, annotations=True, subtitle='Operation Results', save=T
 
     sns.histplot(data=terrain.flatten(), kde=True)
 
-    plt.show()
-
     if save == True:
         figure = plt.gcf()
         figure.set_size_inches(17, 9)
         plt.savefig('plot')
+    else:
+        plt.show()
 
 
 def log(data):
