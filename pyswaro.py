@@ -1,9 +1,10 @@
-from pprint import pprint
-from matplotlib.patches import Rectangle
 import json
+from pprint import pprint
+
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 vars = {}
 with open('vars.json', 'r') as openfile:
@@ -282,7 +283,7 @@ def leaders_subordinates_meeting():
     leader_count()
 
 
-def draw_terrain(terrain, annotations=True, subtitle='Operation Results'):
+def draw_terrain(terrain, annotations=True, subtitle='Operation Results', save=True):
     figure, axes = plt.subplots(1, 2, sharex=False, figsize=(ROWS, COLS))
 
     figure.suptitle(subtitle)
@@ -297,42 +298,54 @@ def draw_terrain(terrain, annotations=True, subtitle='Operation Results'):
             Rectangle((i, j), 1, 1, fill=False, edgecolor='gold', lw=3))
 
     sns.histplot(data=terrain.flatten(), kde=True)
+
     plt.show()
 
+    if save == True:
+        figure = plt.gcf()
+        figure.set_size_inches(17, 9)
+        plt.savefig('plot')
 
-init()
-set_leaders()
 
-pprint('Initial terrain:')
-pprint(terrain)
+def log(data):
+    with open('log.txt', 'a+') as openfile:
+        pprint(data, stream=openfile)
 
-leader_count()
 
-pprint('Leader count:')
-pprint(terrain)
+def common_routine(save_plot=True):
+    init()
+    set_leaders()
 
-pprint('Visited:')
-pprint(visited)
+    log('Initial terrain:')
+    log(terrain)
 
-pprint('Counted:')
-pprint(np.sum(leader_tally) + leftovers)
+    leader_count()
 
-leaders_meeting()
+    log('Leader count:')
+    log(terrain)
 
-pprint('Leaders meeting: ')
-pprint(terrain)
+    log('Visited:')
+    log(visited)
 
-leaders_subordinates_meeting()
+    log('Counted:')
+    log(np.sum(leader_tally) + leftovers)
 
-pprint('Leaders to subs: ')
-pprint(terrain)
+    leaders_meeting()
 
-pprint('Visited: ')
-pprint(visited)
+    log('Leaders meeting: ')
+    log(terrain)
 
-pprint('Operable nodes: ')
-pprint(np.sum(leader_tally) + leftovers)
+    leaders_subordinates_meeting()
 
-draw_terrain(terrain)
-pprint(f'Total time consumed: {total_time_consumed} seconds')
-# TODO: handle simultaneous actions with respect to consumed time
+    log('Leaders to subs: ')
+    log(terrain)
+
+    log('Visited: ')
+    log(visited)
+
+    log('Operable nodes: ')
+    log(np.sum(leader_tally) + leftovers)
+
+    draw_terrain(terrain, save_plot)
+    log(f'Total time consumed: {total_time_consumed} seconds')
+    # TODO: handle simultaneous actions with respect to consumed time
