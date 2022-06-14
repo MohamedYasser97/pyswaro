@@ -1,29 +1,24 @@
 from pprint import pprint
 from matplotlib.patches import Rectangle
+import json
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-ROWS, COLS = (7, 7)
-MIN_INIT_BATTERY = 50
-MAX_INIT_BATTERY = 100
-MIN_OPERABLE_BATTERY = 2
-MAX_RANGE = 5
-BATTERY_TOLLS = {
-    'COMMUNICATION': 5e-4,
-    'MOVEMENT': 6e-4,
-    'ALREADY_VISITED': 2.5e-4,
-}
-TIME_TOLLS = {
-    'SCAN': 2e-3,
-    'TIMEOUT': 1e-3,
-    'PER_RANGE': 0.5e-3,
-    'LEFTOVER': 3e-3,
-    'ALREADY_VISITED': 1e-3,
-    'LEADER_TO_LEADER': 1e-3
-}
+vars = {}
+with open('vars.json', 'r') as openfile:
+    vars = json.load(openfile)
 
-LEADERS_COORDINATES = [(0, 0), (0, 6), (6, 0), (6, 6), (3, 3)]
+ROWS, COLS = (vars["ROWS"], vars["COLS"])
+MIN_INIT_BATTERY = vars["MIN_INIT_BATTERY"]
+MAX_INIT_BATTERY = vars["MAX_INIT_BATTERY"]
+MIN_OPERABLE_BATTERY = vars["MIN_OPERABLE_BATTERY"]
+MAX_RANGE = vars["MAX_RANGE"]
+BATTERY_TOLLS = vars["BATTERY_TOLLS"]
+TIME_TOLLS = vars["TIME_TOLLS"]
+
+LEADERS_COORDINATES = vars["LEADERS_COORDINATES"]
+
 terrain = [[]]
 visited = [[]]
 leader_tally = []
