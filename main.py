@@ -1,12 +1,7 @@
 import json
 import os
-import tarfile
 
-from pyswaro import common_routine, draw_terrain, log
-
-config = {}
-with open('vars.json', 'r') as openfile:
-    config = json.load(openfile)
+from pyswaro import common_routine
 
 
 def create_dir_and_visit(name):
@@ -25,18 +20,18 @@ def change_params(params):
         outfile.write(json_params)
 
 
-def run_experiment(experiment_name):
+def run_experiment(experiment_name, params, annotations=True):
     create_dir_and_visit(experiment_name)
-    log(config)
-    common_routine()
+    change_params(params)
+    common_routine(annots=annotations)
     go_back()
 
 
 def experiment_xyz():
     params = {
-        "ROWS": 5,
-        "COLS": 5,
-        "MIN_INIT_BATTERY": 50,
+        "ROWS": 10,
+        "COLS": 10,
+        "MIN_INIT_BATTERY": 60,
         "MAX_INIT_BATTERY": 100,
         "MIN_OPERABLE_BATTERY": 2,
         "MAX_RANGE": 5,
@@ -54,11 +49,11 @@ def experiment_xyz():
             'LEADER_TO_LEADER': 1e-3
         },
 
-        "LEADERS_COORDINATES": [(0, 0), (0, 4), (4, 0), (4, 4), (2, 2)]
+        "LEADERS_COORDINATES": [(0, 0), (0, 9), (9, 0), (9, 9), (4, 4)]
     }
 
-    change_params(params)
-    run_experiment("xyz")
+    annots = params["ROWS"] <= 30 and params["COLS"] <= 30
+    run_experiment("experiment_xyz", params, annotations=annots)
 
 
 experiment_xyz()

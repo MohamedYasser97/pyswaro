@@ -7,18 +7,15 @@ import seaborn as sns
 from matplotlib.patches import Rectangle
 
 vars = {}
-with open('vars.json', 'r') as openfile:
-    vars = json.load(openfile)
 
-ROWS, COLS = (vars["ROWS"], vars["COLS"])
-MIN_INIT_BATTERY = vars["MIN_INIT_BATTERY"]
-MAX_INIT_BATTERY = vars["MAX_INIT_BATTERY"]
-MIN_OPERABLE_BATTERY = vars["MIN_OPERABLE_BATTERY"]
-MAX_RANGE = vars["MAX_RANGE"]
-BATTERY_TOLLS = vars["BATTERY_TOLLS"]
-TIME_TOLLS = vars["TIME_TOLLS"]
-
-LEADERS_COORDINATES = vars["LEADERS_COORDINATES"]
+ROWS, COLS = (0, 0)
+MIN_INIT_BATTERY = 0
+MAX_INIT_BATTERY = 0
+MIN_OPERABLE_BATTERY = 0
+MAX_RANGE = 0
+BATTERY_TOLLS = {}
+TIME_TOLLS = {}
+LEADERS_COORDINATES = []
 
 terrain = [[]]
 visited = [[]]
@@ -28,7 +25,20 @@ total_time_consumed = 0
 
 
 def init():
-    global terrain, visited, leader_tally
+    global terrain, visited, leader_tally, vars, ROWS, COLS, MIN_INIT_BATTERY, MAX_INIT_BATTERY, MIN_OPERABLE_BATTERY, MAX_RANGE, BATTERY_TOLLS, TIME_TOLLS, LEADERS_COORDINATES
+    
+    with open('vars.json', 'r') as openfile:
+        vars = json.load(openfile)
+
+    ROWS, COLS = (vars["ROWS"], vars["COLS"])
+    MIN_INIT_BATTERY = vars["MIN_INIT_BATTERY"]
+    MAX_INIT_BATTERY = vars["MAX_INIT_BATTERY"]
+    MIN_OPERABLE_BATTERY = vars["MIN_OPERABLE_BATTERY"]
+    MAX_RANGE = vars["MAX_RANGE"]
+    BATTERY_TOLLS = vars["BATTERY_TOLLS"]
+    TIME_TOLLS = vars["TIME_TOLLS"]
+    LEADERS_COORDINATES = vars["LEADERS_COORDINATES"]
+
     terrain = np.random.randint(
         MIN_INIT_BATTERY, MAX_INIT_BATTERY + 1, size=(ROWS, COLS))
     visited = np.zeros([ROWS, COLS])
@@ -283,28 +293,23 @@ def leaders_subordinates_meeting():
     leader_count()
 
 
-def draw_terrain(terrain, annotations=True, subtitle='Operation Results', save=True):
-    figure, axes = plt.subplots(1, 2, sharex=False, figsize=(ROWS, COLS))
+def generate_plots(terrain, annotations=True, subtitle='Operation Results'):
+    plt.title(subtitle)
+    filename_prefix = subtitle.lower().replace(' ', '_')
 
-    figure.suptitle(subtitle)
-    axes[0].set_title('Terrain Battery Levels')
-    axes[1].set_title('Battery Levels Histogram')
-
-    hmap = sns.heatmap(ax=axes[0], data=terrain, annot=annotations, cmap='Greens',
+    hmap = sns.heatmap(data=terrain, annot=annotations, cmap='Greens',
                        cbar=False, fmt='d', xticklabels=False, yticklabels=False)
 
     for i, j in LEADERS_COORDINATES:
         hmap.add_patch(
             Rectangle((i, j), 1, 1, fill=False, edgecolor='gold', lw=3))
 
-    sns.histplot(data=terrain.flatten(), kde=True)
+    plt.savefig('heat_' + filename_prefix)
+    plt.clf()
 
-    if save == True:
-        figure = plt.gcf()
-        figure.set_size_inches(17, 9)
-        plt.savefig('plot')
-    else:
-        plt.show()
+    sns.histplot(data=terrain.flatten(), kde=True)
+    plt.savefig('hist_' + filename_prefix)
+    plt.clf()
 
 
 def log(data):
@@ -312,17 +317,21 @@ def log(data):
         pprint(data, stream=openfile)
 
 
-def common_routine(save_plot=True):
+def common_routine(annots=True):
     init()
     set_leaders()
 
+    print('Starting experiment')
     log('Initial terrain:')
     log(terrain)
+    generate_plots(terrain, subtitle='Initial State', annotations=annots)
 
+    print('Starting leader count')
     leader_count()
 
     log('Leader count:')
     log(terrain)
+    generate_plots(terrain, subtitle='Leader Count', annotations=annots)
 
     log('Visited:')
     log(visited)
@@ -330,22 +339,25 @@ def common_routine(save_plot=True):
     log('Counted:')
     log(np.sum(leader_tally) + leftovers)
 
+    print('Starting leaders meeting')
     leaders_meeting()
 
     log('Leaders meeting: ')
     log(terrain)
+    generate_plots(terrain, subtitle='Leaders Meeting', annotations=annots)
 
+    print('Starting leaders meeting with subordinates')
     leaders_subordinates_meeting()
 
     log('Leaders to subs: ')
     log(terrain)
+    generate_plots(
+        terrain, subtitle='Leader Subordinate Meeting', annotations=annots)
 
     log('Visited: ')
     log(visited)
 
     log('Operable nodes: ')
     log(np.sum(leader_tally) + leftovers)
-
-    draw_terrain(terrain, save_plot)
     log(f'Total time consumed: {total_time_consumed} seconds')
     # TODO: handle simultaneous actions with respect to consumed time
