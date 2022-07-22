@@ -79,13 +79,43 @@ def cdta():
             'LEADER_TO_LEADER': 1e-3
         },
 
-        "LEADERS_COORDINATES": [(0, 0), (0, 3), (3, 0), (3, 3)],
+        # "LEADERS_COORDINATES": [(0, 0), (0, 3), (3, 0), (3, 3)],
+        "LEADERS_COORDINATES": [(0, 0)],
         # allocate a rectangle from 2 edge coordinates
-        "LEADERS_DOMAIN": [[(0, 0), (1, 1)], [(0, 2), (1, 3)], [(2, 0), (3, 1)], [(2, 2), (3, 3)]]
+        "LEADERS_DOMAIN": [[(0, 0), (3, 3)]]
     }
 
     annots = params["ROWS"] <= 30 and params["COLS"] <= 30
     run_cdta("cdta0", params, annotations=annots)
+
+
+def scenario_cdta_compare():
+    params = {
+        "ROWS": 4,
+        "COLS": 4,
+        "MIN_INIT_BATTERY": 60,
+        "MAX_INIT_BATTERY": 100,
+        "MIN_OPERABLE_BATTERY": 2,
+        "MAX_RANGE": 5,
+        "BATTERY_TOLLS": {
+            'COMMUNICATION': 5e-4,
+            'MOVEMENT': 6e-4,
+            'ALREADY_VISITED': 2.5e-4,
+        },
+        "TIME_TOLLS": {
+            'SCAN': 1e-3,
+            'TIMEOUT': 0,
+            'PER_RANGE': 0,
+            'LEFTOVER': 0,
+            'ALREADY_VISITED': 0,
+            'LEADER_TO_LEADER': 1e-3
+        },
+
+        "LEADERS_COORDINATES": [(0, 0)]
+    }
+
+    annots = params["ROWS"] <= 30 and params["COLS"] <= 30
+    run_experiment("compare_cdta", params, annotations=annots)
 
 
 def scenario0():
@@ -263,3 +293,4 @@ def scenario5():
 # scenario4()
 # scenario5()
 cdta()
+scenario_cdta_compare()

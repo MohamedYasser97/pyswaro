@@ -47,6 +47,27 @@ def init():
     leader_tally = np.zeros(len(LEADERS_COORDINATES))
 
 
+def init_radar():
+    global terrain, visited, leader_tally, vars, ROWS, COLS, MIN_INIT_BATTERY, MAX_INIT_BATTERY, MIN_OPERABLE_BATTERY, MAX_RANGE, BATTERY_TOLLS, TIME_TOLLS, LEADERS_COORDINATES
+    
+    with open('vars.json', 'r') as openfile:
+        vars = json.load(openfile)
+
+    ROWS, COLS = (vars["ROWS"], vars["COLS"])
+    MIN_INIT_BATTERY = vars["MIN_INIT_BATTERY"]
+    MAX_INIT_BATTERY = vars["MAX_INIT_BATTERY"]
+    MIN_OPERABLE_BATTERY = vars["MIN_OPERABLE_BATTERY"]
+    MAX_RANGE = vars["MAX_RANGE"]
+    BATTERY_TOLLS = vars["BATTERY_TOLLS"]
+    TIME_TOLLS = vars["TIME_TOLLS"]
+    LEADERS_COORDINATES = vars["LEADERS_COORDINATES"]
+
+    terrain = np.random.randint(
+        MIN_INIT_BATTERY, MAX_INIT_BATTERY + 1, size=(ROWS, COLS))
+    visited = np.zeros([ROWS, COLS])
+    leader_tally = np.zeros(len(LEADERS_COORDINATES))
+
+
 def set_leaders():
     global terrain
     for i, j in LEADERS_COORDINATES:
@@ -375,7 +396,7 @@ def cdta_algo(annots=True):
 
 
 def radar_algo(annots=True):
-    init()
+    init_radar()
     set_leaders()
 
     print('Starting experiment')
