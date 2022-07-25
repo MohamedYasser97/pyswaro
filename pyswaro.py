@@ -26,8 +26,8 @@ total_time_consumed = 0
 
 
 def init():
-    global terrain, visited, leader_tally, vars, ROWS, COLS, MIN_INIT_BATTERY, MAX_INIT_BATTERY, MIN_OPERABLE_BATTERY, MAX_RANGE, BATTERY_TOLLS, TIME_TOLLS, LEADERS_COORDINATES, LEADERS_DOMAIN
-    
+    global total_time_consumed, leftovers, terrain, visited, leader_tally, vars, ROWS, COLS, MIN_INIT_BATTERY, MAX_INIT_BATTERY, MIN_OPERABLE_BATTERY, MAX_RANGE, BATTERY_TOLLS, TIME_TOLLS, LEADERS_COORDINATES, LEADERS_DOMAIN
+
     with open('vars.json', 'r') as openfile:
         vars = json.load(openfile)
 
@@ -45,11 +45,13 @@ def init():
         MIN_INIT_BATTERY, MAX_INIT_BATTERY + 1, size=(ROWS, COLS))
     visited = np.zeros([ROWS, COLS])
     leader_tally = np.zeros(len(LEADERS_COORDINATES))
+    total_time_consumed = 0
+    leftovers = 0
 
 
 def init_radar():
-    global terrain, visited, leader_tally, vars, ROWS, COLS, MIN_INIT_BATTERY, MAX_INIT_BATTERY, MIN_OPERABLE_BATTERY, MAX_RANGE, BATTERY_TOLLS, TIME_TOLLS, LEADERS_COORDINATES
-    
+    global total_time_consumed, leftovers, terrain, visited, leader_tally, vars, ROWS, COLS, MIN_INIT_BATTERY, MAX_INIT_BATTERY, MIN_OPERABLE_BATTERY, MAX_RANGE, BATTERY_TOLLS, TIME_TOLLS, LEADERS_COORDINATES
+
     with open('vars.json', 'r') as openfile:
         vars = json.load(openfile)
 
@@ -66,6 +68,8 @@ def init_radar():
         MIN_INIT_BATTERY, MAX_INIT_BATTERY + 1, size=(ROWS, COLS))
     visited = np.zeros([ROWS, COLS])
     leader_tally = np.zeros(len(LEADERS_COORDINATES))
+    total_time_consumed = 0
+    leftovers = 0
 
 
 def set_leaders():
@@ -294,12 +298,13 @@ def leader_count():
         scan_range += 1
 
 
-def sub_star_leader():
+# Leader talks directly to subs with no need for base station in a star topology
+def leader_count_simplified_star():
     global total_time_consumed
-    
+
     for domain in LEADERS_DOMAIN:
         leader_x = 0
-        leader_y= 0
+        leader_y = 0
         cluster_count = 0
         for i in range(domain[0][0], domain[1][0] + 1):
             for j in range(domain[0][1], domain[1][1] + 1):
@@ -314,6 +319,23 @@ def sub_star_leader():
         terrain[leader_x][leader_y] -= BATTERY_TOLLS['COMMUNICATION'] * cluster_count
 
 
+def cdta_comm_base_station():
+    global total_time_consumed
+
+    for domain in LEADERS_DOMAIN:
+        cluster_count = 0
+        for i in range(domain[0][0], domain[1][0] + 1):
+            for j in range(domain[0][1], domain[1][1] + 1):
+                drain_battery(i, j)
+                # extra 2 because subs will reply to leader too
+                total_time_consumed += 2 * 2 * TIME_TOLLS['COMMUNICATION']
+                cluster_count += 1
+
+        # They stated in the paper that max simultaneous comm buffer is 4 so we add waiting time
+        if cluster_count >= 4:
+            total_time_consumed += 2 * (cluster_count / 4) * 1e-3
+
+
 # Maybe add timeouts in the future
 def leaders_meeting():
     global total_time_consumed
@@ -323,6 +345,30 @@ def leaders_meeting():
 
     total_time_consumed += TIME_TOLLS['LEADER_TO_LEADER'] * \
         len(LEADERS_COORDINATES)
+
+
+# Leaders communicate in a ring topology
+def leaders_ring():
+    global total_time_consumed
+    for i, j in LEADERS_COORDINATES:
+        drain_battery(i, j)
+
+    total_time_consumed += TIME_TOLLS['LEADER_TO_LEADER'] * \
+        len(LEADERS_COORDINATES)
+
+
+def leaders_meeting_cdta():
+    global total_time_consumed
+    for i, j in LEADERS_COORDINATES:
+        terrain[i][j] -= BATTERY_TOLLS['COMMUNICATION'] * \
+            (len(LEADERS_COORDINATES)-1)
+
+    total_time_consumed += TIME_TOLLS['LEADER_TO_LEADER'] * \
+        len(LEADERS_COORDINATES) * 2
+
+    if len(LEADERS_COORDINATES) >= 4:
+        total_time_consumed += (len(LEADERS_COORDINATES) / 4) * \
+            TIME_TOLLS['LEADER_TO_LEADER']
 
 
 # Same as leader_count() but to inform them of total number.
@@ -370,14 +416,15 @@ def cdta_algo(annots=True):
     generate_plots(terrain, subtitle='Initial State', annotations=annots)
 
     print('Starting subordinates to leaders communication')
-    sub_star_leader()
+    cdta_comm_base_station()
 
     log('Post cluster communication:')
     log(terrain)
-    generate_plots(terrain, subtitle='Post Cluster Communication', annotations=annots)
+    generate_plots(
+        terrain, subtitle='Post Cluster Communication', annotations=annots)
 
     print('Starting leaders meeting')
-    leaders_meeting()
+    leaders_meeting_cdta()
 
     log('Leaders meeting: ')
     log(terrain)
@@ -385,7 +432,7 @@ def cdta_algo(annots=True):
 
     # This is the same process as sub to leader but reversed. Order won't matter.
     print('Starting leaders meeting with subordinates')
-    sub_star_leader()
+    cdta_comm_base_station()
 
     log('Leaders to subs: ')
     log(terrain)
@@ -437,4 +484,38 @@ def radar_algo(annots=True):
 
     log('Operable nodes: ')
     log(np.sum(leader_tally) + leftovers)
+    log(f'Total time consumed: {total_time_consumed} seconds')
+
+
+def radar_algo_simplified(annots=True):
+    init()
+    set_leaders()
+
+    print('Starting experiment')
+    log('Initial terrain:')
+    log(terrain)
+    generate_plots(terrain, subtitle='Initial State', annotations=annots)
+
+    print('Starting leader count')
+    leader_count_simplified_star()
+
+    log('Leader count:')
+    log(terrain)
+    generate_plots(terrain, subtitle='Leader Count', annotations=annots)
+
+    print('Starting leaders meeting')
+    leaders_ring()
+
+    log('Leaders meeting: ')
+    log(terrain)
+    generate_plots(terrain, subtitle='Leaders Meeting', annotations=annots)
+
+    print('Starting leaders meeting with subordinates')
+    leader_count_simplified_star()
+
+    log('Leaders to subs: ')
+    log(terrain)
+    generate_plots(
+        terrain, subtitle='Leader Subordinate Meeting', annotations=annots)
+
     log(f'Total time consumed: {total_time_consumed} seconds')
