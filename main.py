@@ -1,7 +1,7 @@
 import json
 import os
 
-from pyswaro import cdta_algo, radar_algo, radar_algo_simplified
+from pyswaro import cdta_algo, radar_algo, novel_algo_ring, novel_algo_star
 
 
 def create_dir_and_visit(name):
@@ -27,10 +27,17 @@ def run_experiment(experiment_name, params, annotations=True):
     go_back()
 
 
-def run_experiment_simplified(experiment_name, params, annotations=True): 
+def run_experiment_simplified_star(experiment_name, params, annotations=True):
     create_dir_and_visit(experiment_name)
     change_params(params)
-    radar_algo_simplified(annots=annotations)
+    novel_algo_star(annots=annotations)
+    go_back()
+
+
+def run_experiment_simplified_ring(experiment_name, params, annotations=True):
+    create_dir_and_visit(experiment_name)
+    change_params(params)
+    novel_algo_ring(annots=annotations)
     go_back()
 
 
@@ -96,7 +103,7 @@ def cdta():
     run_cdta("cdta", params, annotations=annots)
 
 
-def radar_simplified():
+def our_star_approach():
     params = {
         "ROWS": 6,
         "COLS": 6,
@@ -119,7 +126,64 @@ def radar_simplified():
     }
 
     annots = params["ROWS"] <= 30 and params["COLS"] <= 30
-    run_experiment_simplified("radar_simplified_star", params, annotations=annots)
+    run_experiment_simplified_star(
+        "our_star_approach", params, annotations=annots)
+
+
+def our_ring_approach():
+    params = {
+        "ROWS": 6,
+        "COLS": 6,
+        "MIN_INIT_BATTERY": 60,
+        "MAX_INIT_BATTERY": 100,
+        "MIN_OPERABLE_BATTERY": 2,
+        "MAX_RANGE": -1,
+        "BATTERY_TOLLS": {
+            'COMMUNICATION': 5e-4,
+        },
+        "TIME_TOLLS": {
+            'COMMUNICATION': 1e-3,
+            'LEADER_TO_LEADER': 1e-3
+        },
+
+        # "LEADERS_COORDINATES": [(0, 0), (0, 3), (3, 0), (3, 3)],
+        "LEADERS_COORDINATES": [(0, 0), (0, 3), (3, 0), (3, 3)],
+        # allocate a rectangle from 2 edge coordinates
+        "LEADERS_DOMAIN": [[(0, 0), (2, 2)], [(0, 3), (2, 5)], [(3, 0), (5, 2)], [(3, 3), (5, 5)]]
+    }
+
+    annots = params["ROWS"] <= 30 and params["COLS"] <= 30
+    run_experiment_simplified_ring(
+        "our_ring_approach", params, annotations=annots)
+
+
+def original_radar():
+    params = {
+        "ROWS": 6,
+        "COLS": 6,
+        "MIN_INIT_BATTERY": 60,
+        "MAX_INIT_BATTERY": 100,
+        "MIN_OPERABLE_BATTERY": 2,
+        "MAX_RANGE": 5,
+        "BATTERY_TOLLS": {
+            'COMMUNICATION': 5e-4,
+            'MOVEMENT': 6e-4,
+            'ALREADY_VISITED': 2.5e-4,
+        },
+        "TIME_TOLLS": {
+            'SCAN': 1e-3,
+            'TIMEOUT': 1e-3,
+            'PER_RANGE': 0.5e-3,
+            'LEFTOVER': 1e-3,
+            'ALREADY_VISITED': 1e-3,
+            'LEADER_TO_LEADER': 1e-3
+        },
+
+        "LEADERS_COORDINATES": [(0, 0), (0, 3), (3, 0), (3, 3)]
+    }
+
+    annots = params["ROWS"] <= 30 and params["COLS"] <= 30
+    run_experiment("original_radar", params, annotations=annots)
 
 
 # def scenario0():
@@ -297,4 +361,6 @@ def radar_simplified():
 # scenario4()
 # scenario5()
 cdta()
-radar_simplified()
+our_star_approach()
+our_ring_approach()
+original_radar()

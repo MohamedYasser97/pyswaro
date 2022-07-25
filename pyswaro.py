@@ -319,6 +319,16 @@ def leader_count_simplified_star():
         terrain[leader_x][leader_y] -= BATTERY_TOLLS['COMMUNICATION'] * cluster_count
 
 
+def leader_count_simplified_ring():
+    global total_time_consumed
+
+    for domain in LEADERS_DOMAIN:
+        for i in range(domain[0][0], domain[1][0] + 1):
+            for j in range(domain[0][1], domain[1][1] + 1):
+                drain_battery(i, j)
+                total_time_consumed += TIME_TOLLS['COMMUNICATION']
+
+
 def cdta_comm_base_station():
     global total_time_consumed
 
@@ -487,7 +497,7 @@ def radar_algo(annots=True):
     log(f'Total time consumed: {total_time_consumed} seconds')
 
 
-def radar_algo_simplified(annots=True):
+def novel_algo_star(annots=True):
     init()
     set_leaders()
 
@@ -512,6 +522,40 @@ def radar_algo_simplified(annots=True):
 
     print('Starting leaders meeting with subordinates')
     leader_count_simplified_star()
+
+    log('Leaders to subs: ')
+    log(terrain)
+    generate_plots(
+        terrain, subtitle='Leader Subordinate Meeting', annotations=annots)
+
+    log(f'Total time consumed: {total_time_consumed} seconds')
+
+
+def novel_algo_ring(annots=True):
+    init()
+    set_leaders()
+
+    print('Starting experiment')
+    log('Initial terrain:')
+    log(terrain)
+    generate_plots(terrain, subtitle='Initial State', annotations=annots)
+
+    print('Starting leader count')
+    leader_count_simplified_ring()
+
+    log('Leader count:')
+    log(terrain)
+    generate_plots(terrain, subtitle='Leader Count', annotations=annots)
+
+    print('Starting leaders meeting')
+    leaders_ring()
+
+    log('Leaders meeting: ')
+    log(terrain)
+    generate_plots(terrain, subtitle='Leaders Meeting', annotations=annots)
+
+    print('Starting leaders meeting with subordinates')
+    leader_count_simplified_ring()
 
     log('Leaders to subs: ')
     log(terrain)
