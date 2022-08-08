@@ -513,7 +513,9 @@ def novel_algo_star(annots=True):
     log(terrain)
     generate_plots(terrain, subtitle='Leader Count', annotations=annots)
 
+    # Twice so that all leaders know the result
     print('Starting leaders meeting')
+    leaders_ring()
     leaders_ring()
 
     log('Leaders meeting: ')
@@ -547,7 +549,9 @@ def novel_algo_ring(annots=True):
     log(terrain)
     generate_plots(terrain, subtitle='Leader Count', annotations=annots)
 
+    # Twice so that all leaders know the result
     print('Starting leaders meeting')
+    leaders_ring()
     leaders_ring()
 
     log('Leaders meeting: ')
