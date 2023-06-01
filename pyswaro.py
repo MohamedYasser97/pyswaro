@@ -423,6 +423,10 @@ def cdta_algo(annots=True):
     print('Starting experiment')
     log('Initial terrain:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Initial State', annotations=annots)
 
     print('Starting subordinates to leaders communication')
@@ -430,6 +434,10 @@ def cdta_algo(annots=True):
 
     log('Post cluster communication:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(
         terrain, subtitle='Post Cluster Communication', annotations=annots)
 
@@ -438,6 +446,10 @@ def cdta_algo(annots=True):
 
     log('Leaders meeting: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Leaders Meeting', annotations=annots)
 
     # This is the same process as sub to leader but reversed. Order won't matter.
@@ -446,6 +458,10 @@ def cdta_algo(annots=True):
 
     log('Leaders to subs: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(
         terrain, subtitle='Leader Subordinate Meeting', annotations=annots)
 
@@ -459,6 +475,10 @@ def radar_algo(annots=True):
     print('Starting experiment')
     log('Initial terrain:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Initial State', annotations=annots)
 
     print('Starting leader count')
@@ -466,6 +486,10 @@ def radar_algo(annots=True):
 
     log('Leader count:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Leader Count', annotations=annots)
 
     log('Visited:')
@@ -479,6 +503,10 @@ def radar_algo(annots=True):
 
     log('Leaders meeting: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Leaders Meeting', annotations=annots)
 
     print('Starting leaders meeting with subordinates')
@@ -486,6 +514,10 @@ def radar_algo(annots=True):
 
     log('Leaders to subs: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(
         terrain, subtitle='Leader Subordinate Meeting', annotations=annots)
 
@@ -504,6 +536,9 @@ def novel_algo_star(annots=True):
     print('Starting experiment')
     log('Initial terrain:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
     generate_plots(terrain, subtitle='Initial State', annotations=annots)
 
     print('Starting leader count')
@@ -511,6 +546,10 @@ def novel_algo_star(annots=True):
 
     log('Leader count:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Leader Count', annotations=annots)
 
     # Twice so that all leaders know the result
@@ -520,6 +559,10 @@ def novel_algo_star(annots=True):
 
     log('Leaders meeting: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Leaders Meeting', annotations=annots)
 
     print('Starting leaders meeting with subordinates')
@@ -527,6 +570,10 @@ def novel_algo_star(annots=True):
 
     log('Leaders to subs: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(
         terrain, subtitle='Leader Subordinate Meeting', annotations=annots)
 
@@ -540,6 +587,10 @@ def novel_algo_ring(annots=True):
     print('Starting experiment')
     log('Initial terrain:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Initial State', annotations=annots)
 
     print('Starting leader count')
@@ -547,6 +598,10 @@ def novel_algo_ring(annots=True):
 
     log('Leader count:')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Leader Count', annotations=annots)
 
     # Twice so that all leaders know the result
@@ -556,6 +611,10 @@ def novel_algo_ring(annots=True):
 
     log('Leaders meeting: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(terrain, subtitle='Leaders Meeting', annotations=annots)
 
     print('Starting leaders meeting with subordinates')
@@ -563,6 +622,10 @@ def novel_algo_ring(annots=True):
 
     log('Leaders to subs: ')
     log(terrain)
+
+    log('LEADERS BATTERY:')
+    log([terrain[i][j] for i, j in LEADERS_COORDINATES])
+
     generate_plots(
         terrain, subtitle='Leader Subordinate Meeting', annotations=annots)
 
