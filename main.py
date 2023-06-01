@@ -1,7 +1,8 @@
 import json
+import math
 import os
 
-from pyswaro import cdta_algo, radar_algo, novel_algo_ring, novel_algo_star
+from pyswaro import cdta_algo, novel_algo_ring, novel_algo_star, radar_algo
 
 
 def create_dir_and_visit(name):
@@ -354,13 +355,156 @@ def original_radar():
 #     annots = params["ROWS"] <= 30 and params["COLS"] <= 30
 #     run_experiment("scenario5", params, annotations=annots)
 
+
+def cdta_runner():
+    for leaders_num in [1, 2, 4, 8, 16, 32, 64]:
+        for rows_cols in [2, 4, 8, 16, 32, 64]:
+
+            if leaders_num >= math.isqrt(rows_cols**2):
+                continue
+
+            leaders_coordinates = []
+            leaders_domain = []
+
+            subgrid_size = rows_cols // math.isqrt(leaders_num)
+
+            for i in range(leaders_num):
+                leader_row = (i // math.isqrt(leaders_num)) * subgrid_size
+                leader_col = (i % math.isqrt(leaders_num)) * subgrid_size
+
+                leader_row = min(leader_row, rows_cols - subgrid_size)
+                leader_col = min(leader_col, rows_cols - subgrid_size)
+
+                leaders_coordinates.append((leader_row, leader_col))
+                leaders_domain.append(
+                    [(leader_row, leader_col), (leader_row + subgrid_size - 1, leader_col + subgrid_size - 1)])
+
+            print(leaders_coordinates, leaders_domain)
+            params = {
+                "ROWS": rows_cols,
+                "COLS": rows_cols,
+                "MIN_INIT_BATTERY": 60,
+                "MAX_INIT_BATTERY": 100,
+                "MIN_OPERABLE_BATTERY": 2,
+                "MAX_RANGE": -1,
+                "BATTERY_TOLLS": {
+                    'COMMUNICATION': 5e-4,
+                },
+                "TIME_TOLLS": {
+                    'COMMUNICATION': 1e-3,
+                    'LEADER_TO_LEADER': 1e-3
+                },
+                "LEADERS_COORDINATES": leaders_coordinates,
+                "LEADERS_DOMAIN": leaders_domain
+            }
+
+            run_cdta('cdta_{leaders_num}_{population}'.format(leaders_num=leaders_num,
+                     population=params['ROWS'] * params['COLS']), params)
+
+
+def starring_runner():
+    for leaders_num in [1, 2, 4, 8, 16, 32, 64]:
+        for rows_cols in [2, 4, 8, 16, 32, 64]:
+
+            if leaders_num >= math.isqrt(rows_cols**2):
+                continue
+
+            leaders_coordinates = []
+            leaders_domain = []
+
+            subgrid_size = rows_cols // math.isqrt(leaders_num)
+
+            for i in range(leaders_num):
+                leader_row = (i // math.isqrt(leaders_num)) * subgrid_size
+                leader_col = (i % math.isqrt(leaders_num)) * subgrid_size
+
+                leader_row = min(leader_row, rows_cols - subgrid_size)
+                leader_col = min(leader_col, rows_cols - subgrid_size)
+
+                leaders_coordinates.append((leader_row, leader_col))
+                leaders_domain.append(
+                    [(leader_row, leader_col), (leader_row + subgrid_size - 1, leader_col + subgrid_size - 1)])
+
+            print(leaders_coordinates, leaders_domain)
+            params = {
+                "ROWS": rows_cols,
+                "COLS": rows_cols,
+                "MIN_INIT_BATTERY": 60,
+                "MAX_INIT_BATTERY": 100,
+                "MIN_OPERABLE_BATTERY": 2,
+                "MAX_RANGE": -1,
+                "BATTERY_TOLLS": {
+                    'COMMUNICATION': 5e-4,
+                },
+                "TIME_TOLLS": {
+                    'COMMUNICATION': 1e-3,
+                    'LEADER_TO_LEADER': 1e-3
+                },
+                "LEADERS_COORDINATES": leaders_coordinates,
+                "LEADERS_DOMAIN": leaders_domain
+            }
+
+            run_experiment_simplified_star('sr_{leaders_num}_{population}'.format(leaders_num=leaders_num,
+                                                                                  population=params['ROWS'] * params['COLS']), params)
+
+
+def dring_runner():
+    for leaders_num in [1, 2, 4, 8, 16, 32, 64]:
+        for rows_cols in [2, 4, 8, 16, 32, 64]:
+
+            if leaders_num >= math.isqrt(rows_cols**2):
+                continue
+
+            leaders_coordinates = []
+            leaders_domain = []
+
+            subgrid_size = rows_cols // math.isqrt(leaders_num)
+
+            for i in range(leaders_num):
+                leader_row = (i // math.isqrt(leaders_num)) * subgrid_size
+                leader_col = (i % math.isqrt(leaders_num)) * subgrid_size
+
+                leader_row = min(leader_row, rows_cols - subgrid_size)
+                leader_col = min(leader_col, rows_cols - subgrid_size)
+
+                leaders_coordinates.append((leader_row, leader_col))
+                leaders_domain.append(
+                    [(leader_row, leader_col), (leader_row + subgrid_size - 1, leader_col + subgrid_size - 1)])
+
+            print(leaders_coordinates, leaders_domain)
+            params = {
+                "ROWS": rows_cols,
+                "COLS": rows_cols,
+                "MIN_INIT_BATTERY": 60,
+                "MAX_INIT_BATTERY": 100,
+                "MIN_OPERABLE_BATTERY": 2,
+                "MAX_RANGE": -1,
+                "BATTERY_TOLLS": {
+                    'COMMUNICATION': 5e-4,
+                },
+                "TIME_TOLLS": {
+                    'COMMUNICATION': 1e-3,
+                    'LEADER_TO_LEADER': 1e-3
+                },
+                "LEADERS_COORDINATES": leaders_coordinates,
+                "LEADERS_DOMAIN": leaders_domain
+            }
+
+            run_experiment_simplified_ring('dr_{leaders_num}_{population}'.format(leaders_num=leaders_num,
+                                                                                  population=params['ROWS'] * params['COLS']), params)
+
 # scenario0()
 # scenario1()
 # scenario2()
 # scenario3()
 # scenario4()
 # scenario5()
-cdta()
-our_star_approach()
-our_ring_approach()
-original_radar()
+# cdta()
+# our_star_approach()
+# our_ring_approach()
+# original_radar()
+
+
+# cdta_runner()
+# starring_runner()
+dring_runner()
